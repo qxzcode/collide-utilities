@@ -10,31 +10,27 @@ from pydantic import BaseModel
 class CombatEntity(BaseModel):
     """A ship, turret, or other entity that can attack and take damage."""
     
+    kind: str
     name: str
     max_hp: int
+    max_shields: int
     hp: int
     shields: int
-    dodge: int
     firepower: int
-    big_shot: bool = False
+    crit_chance: int
 
-    def __init__(self, name, hp, shields, dodge, firepower, big_shot=False):
-        super().__init__(
+    @staticmethod
+    def new_ship(kind, name, hp, shields, firepower, crit_chance) -> 'CombatEntity':
+        return CombatEntity(
+            kind=kind,
             name=name,
             max_hp=hp,
+            max_shields=shields,
             hp=hp,
             shields=shields,
-            dodge=dodge,
             firepower=firepower,
-            big_shot=big_shot,
+            crit_chance=crit_chance,
         )
-
-    def __post_init__(self):
-        print(f'Created "{self.name}" with dodge chance {self.dodge_chance}')
-
-    @property
-    def dodge_chance(self) -> float:
-        return 1.0 - math.exp((0 - self.dodge) / 10)
 
     def take_damage(self, damage, attacker):
         modifier = ATTACK_MODIFIERS[(type(attacker), type(self))]
@@ -75,86 +71,53 @@ class CombatEntity(BaseModel):
         return f'CombatEntity["{self.name}", hp={self.hp}/{self.max_hp}]'
 
 
-class City(CombatEntity):
-    def __init__(self, name, stability):
-        super().__init__(name, hp=stability, shields=0, dodge=0, firepower=0)
+def new_scout(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('scout', name, hp=8, shields=2, firepower=4, crit_chance=0)
 
-    def take_damage(self, damage, attacker):
-        print(f'"{self.name}" loses 1 stability point!')
-        self.hp -= 1
-        if self.hp <= 0:
-            self.hp = 0
-            print(f'"{self.name}" was conquered!')
+def new_destroyer(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('destroyer', name, hp=12, shields=6, firepower=6, crit_chance=0)
 
+def new_sniper(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('sniper', name, hp=5, shields=0, firepower=10, crit_chance=0)
 
-class Scout(CombatEntity):
-    def __init__(self, name):
-        super().__init__(name, hp=8, shields=2, dodge=6, firepower=4)
+def new_dreadnought(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('dreadnought', name, hp=30, shields=10, firepower=8, crit_chance=0)
 
-class Destroyer(CombatEntity):
-    def __init__(self, name):
-        super().__init__(name, hp=12, shields=6, dodge=4, firepower=6)
-
-class Sniper(CombatEntity):
-    def __init__(self, name):
-        super().__init__(name, hp=5, shields=0, dodge=6, firepower=10, big_shot=True)
-
-class Dreadnought(CombatEntity):
-    def __init__(self, name):
-        super().__init__(name, hp=30, shields=10, dodge=0, firepower=8, big_shot=True)
-
-class PlanetaryTurret(CombatEntity):
-    def __init__(self, name):
-        super().__init__(name, hp=25, shields=0, dodge=0, firepower=8)
+def new_planetary_turret(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('planetary_turret', name, hp=25, shields=0, firepower=8, crit_chance=0)
 
 
 # (attacker, defender): 'strong' | 'weak' | 'balanced'
 # whether the attacker's attack is strong against the defender
 ATTACK_MODIFIERS = defaultdict(lambda: 'balanced', {
-    (Scout, Sniper): 'strong',
-    (Sniper, Scout): 'weak',
+    ('scout', 'sniper'): 'strong',
+    ('sniper', 'scout'): 'weak',
 
-    (Scout, Dreadnought): 'strong',
-    (Dreadnought, Scout): 'weak',
+    ('scout', 'dreadnought'): 'strong',
+    ('dreadnought', 'scout'): 'weak',
 
-    (Scout, PlanetaryTurret): 'strong',
-    (PlanetaryTurret, Scout): 'weak',
+    ('scout', 'planetary_turret'): 'strong',
+    ('planetary_turret', 'scout'): 'weak',
 
-    (Sniper, Dreadnought): 'strong',
-    (Dreadnought, Sniper): 'weak',
+    ('sniper', 'dreadnought'): 'strong',
+    ('dreadnought', 'sniper'): 'weak',
 
-    (Dreadnought, Destroyer): 'strong',
-    (Destroyer, Dreadnought): 'weak',
+    ('dreadnought', 'destroyer'): 'strong',
+    ('destroyer', 'dreadnought'): 'weak',
 })
-
-
-"""
-light_a = CombatEntity("Light A", hp=15, dodge=10, firepower=2)
-medium_a = CombatEntity("Medium A", hp=30, dodge=4, firepower=14)
-heavy_a = CombatEntity("Heavy A", hp=53, dodge=8, firepower=11)
-a_ships = [light_a, medium_a, heavy_a]
-
-light_b = CombatEntity("Light B", hp=13, dodge=8, firepower=8)
-medium_b = CombatEntity("Medium B", hp=24, dodge=8, firepower=10)
-heavy_b = CombatEntity("Heavy B", hp=50, dodge=8, firepower=13)
-b_ships = [light_b, medium_b, heavy_b]
-"""
 
 
 class MyJSONEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, BaseModel):
             return {
-                '__type__': type(o).__name__,
                 **o.dict(),
             }
         return super().default(o)
 
 def decode_object_hook(d):
-    if '__type__' in d:
-        class_name = d.pop('__type__')
-        class_ = globals()[class_name]
-        return class_.parse_obj(d)
+    if 'kind' in d:
+        return CombatEntity.parse_obj(d)
     return d
 
 
@@ -163,19 +126,19 @@ RESET = '\033[0m'
 
 def main():
     entities: list[CombatEntity] = [
-        Sniper('[A] Sniper #1'),
-        Dreadnought('[A] Dreadnought #1'),
-        Scout('[A] Scout #3'),
-        Scout('[A] Scout #4'),
-        Destroyer('[A] Destroyer #2'),
+        new_sniper('[A] Sniper #1'),
+        new_dreadnought('[A] Dreadnought #1'),
+        new_scout('[A] Scout #3'),
+        new_scout('[A] Scout #4'),
+        new_destroyer('[A] Destroyer #2'),
         None,
-        Scout('[D] Scout #1'),
-        Scout('[D] Scout #2'),
-        Destroyer('[D] Destroyer #1'),
-        PlanetaryTurret('[D] Planetary Turret'),
-        CombatEntity('[D] Deployment Station', hp=20, shields=0, dodge=0, firepower=0),
-        City('[D] Colony', stability=4),
-        City('[D] City', stability=6),
+        new_scout('[D] Scout #1'),
+        new_scout('[D] Scout #2'),
+        new_destroyer('[D] Destroyer #1'),
+        new_planetary_turret('[D] Planetary Turret'),
+        # CombatEntity('[D] Deployment Station', hp=20, shields=0, dodge=0, firepower=0),
+        # City('[D] Colony', stability=4),
+        # City('[D] City', stability=6),
     ]
 
     try:
@@ -200,7 +163,7 @@ def main():
                     color = '\033[93m'
                 else:
                     color = '\033[92m'
-                hp_str = f'{entity.shields}+{entity.hp}/{entity.max_hp}'
+                hp_str = f'{entity.shields}/{entity.max_shields} + {entity.hp}/{entity.max_hp}'
                 print(f'{color}({i})\t{entity.name:24} {hp_str:10}{RESET}')
 
         print()
