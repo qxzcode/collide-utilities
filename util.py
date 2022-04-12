@@ -32,28 +32,21 @@ class CombatEntity(BaseModel):
             crit_chance=crit_chance,
         )
 
-    def take_damage(self, damage, attacker):
-        modifier = ATTACK_MODIFIERS[(type(attacker), type(self))]
+    def take_damage(self, firepower: int, attacker: 'CombatEntity'):
+        modifier = ATTACK_MODIFIERS[(attacker.kind, self.kind)]
         if modifier == 'strong':
-            dodge_chance = self.dodge_chance / 2
-        elif modifier == 'weak':
-            dodge_chance = 1.0 - (1.0 - self.dodge_chance)/2
+            crit_chance = min(attacker.crit_chance * 2, 100)
         else:
-            dodge_chance = self.dodge_chance
-        print(f'Effective dodge chance: {dodge_chance}')
+            crit_chance = attacker.crit_chance
+        print(f'Firepower: {firepower}, effective crit chance: {crit_chance}')
 
-        if attacker.big_shot:
-            if random.random() >= dodge_chance:
-                actual_damage = damage
-            else:
-                actual_damage = 0
+        if random.random() * 100 <= crit_chance:
+            print('Critical hit!')
+            actual_damage = firepower * 2
         else:
-            actual_damage = 0
-            for _ in range(damage):
-                if random.random() >= dodge_chance:
-                    actual_damage += 1
+            actual_damage = firepower
 
-        print(f'"{self.name}" takes {actual_damage} (out of {damage} possible) damage!')
+        print(f'"{self.name}" takes {actual_damage} damage!')
         shield_damage = min(actual_damage, self.shields)
         self.shields -= shield_damage
 
@@ -165,7 +158,7 @@ def main():
             else:
                 if entity.hp <= 0:
                     color = '\033[91m'
-                elif entity.hp < entity.max_hp:
+                elif entity.hp < entity.max_hp or entity.shields < entity.max_shields:
                     color = '\033[93m'
                 else:
                     color = '\033[92m'
@@ -177,14 +170,8 @@ def main():
         atk_entity = entities[atk_index]
         def_index = get_number('Defender: ', range(len(entities)))
         def_entity = entities[def_index]
-        do_return_fire = input('Return fire? (y/n) ') == 'y'
 
         atk_entity.attack(def_entity)
-        if do_return_fire and def_entity.hp > 0:
-            print('Return fire!')
-            def_entity.attack(atk_entity)
-        else:
-            print('No return fire!')
         print()
 
 
