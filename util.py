@@ -72,19 +72,25 @@ class CombatEntity(BaseModel):
 
 
 def new_scout(name: str) -> CombatEntity:
-    return CombatEntity.new_ship('scout', name, hp=8, shields=2, firepower=4, crit_chance=0)
+    return CombatEntity.new_ship('scout', name, hp=5, shields=5, firepower=4, crit_chance=30)
 
 def new_destroyer(name: str) -> CombatEntity:
-    return CombatEntity.new_ship('destroyer', name, hp=12, shields=6, firepower=6, crit_chance=0)
+    return CombatEntity.new_ship('destroyer', name, hp=14, shields=8, firepower=7, crit_chance=10)
 
 def new_sniper(name: str) -> CombatEntity:
-    return CombatEntity.new_ship('sniper', name, hp=5, shields=0, firepower=10, crit_chance=0)
+    return CombatEntity.new_ship('sniper', name, hp=3, shields=7, firepower=10, crit_chance=60)
 
 def new_dreadnought(name: str) -> CombatEntity:
-    return CombatEntity.new_ship('dreadnought', name, hp=30, shields=10, firepower=8, crit_chance=0)
+    return CombatEntity.new_ship('dreadnought', name, hp=35, shields=20, firepower=10, crit_chance=35)
 
 def new_planetary_turret(name: str) -> CombatEntity:
-    return CombatEntity.new_ship('planetary_turret', name, hp=25, shields=0, firepower=8, crit_chance=0)
+    return CombatEntity.new_ship('planetary_turret', name, hp=55, shields=0, firepower=14, crit_chance=20)
+
+def new_mining_ship(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('mining_ship', name, hp=2, shields=4, firepower=1, crit_chance=80)
+
+def new_trade_ship(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('trade_ship', name, hp=4, shields=0, firepower=0, crit_chance=0)
 
 
 # (attacker, defender): 'strong' | 'weak' | 'balanced'
