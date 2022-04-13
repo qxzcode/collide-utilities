@@ -85,15 +85,76 @@ def new_mining_ship(name: str) -> CombatEntity:
 def new_trade_ship(name: str) -> CombatEntity:
     return CombatEntity.new_ship('trade_ship', name, hp=4, shields=0, firepower=0, crit_chance=0)
 
+def new_core_drill(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('core_drill', name, hp=15, shields=0, firepower=0, crit_chance=0)
+
+def new_shipyard(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('shipyard', name, hp=35, shields=0, firepower=0, crit_chance=0)
+
+def new_mining_depot(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('mining_depot', name, hp=25, shields=0, firepower=0, crit_chance=0)
+
+def new_trade_depot(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('trade_depot', name, hp=20, shields=0, firepower=0, crit_chance=0)
+
+def new_refinery(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('refinery', name, hp=30, shields=0, firepower=0, crit_chance=0)
+
+def new_fabricator(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('fabricator', name, hp=30, shields=0, firepower=0, crit_chance=0)
+
+def new_tech_factory(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('tech_factory', name, hp=20, shields=0, firepower=0, crit_chance=0)
+
+def new_death_beam(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('death_beam', name, hp=10, shields=0, firepower=0, crit_chance=0)
+
+def new_emergency_shields(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('emergency_shields', name, hp=25, shields=0, firepower=0, crit_chance=0)
+
+def new_comms_tower(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('comms_tower', name, hp=25, shields=0, firepower=0, crit_chance=0)
+
+def new_hacking_terminal(name: str) -> CombatEntity:
+    return CombatEntity.new_ship('hacking_terminal', name, hp=20, shields=0, firepower=0, crit_chance=0)
+
 
 # (attacker, defender): 'strong' | 'weak' | 'balanced'
 # whether the attacker's attack is strong against the defender
 ATTACK_MODIFIERS = defaultdict(lambda: 'balanced', {
     ('scout', 'sniper'): 'strong',
     ('scout', 'dreadnought'): 'strong',
-    ('scout', 'planetary_turret'): 'strong',
+    ('scout', 'trade_ship'): 'strong',
+    ('destroyer', 'scout'): 'strong',
+    ('destroyer', 'trade_ship'): 'strong',
+    ('destroyer', 'core_drill'): 'strong',
+    ('destroyer', 'shipyard'): 'strong',
+    ('destroyer', 'mining_depot'): 'strong',
+    ('destroyer', 'trade_depot'): 'strong',
+    ('destroyer', 'refinery'): 'strong',
+    ('destroyer', 'fabricator'): 'strong',
+    ('destroyer', 'tech_factory'): 'strong',
+    ('destroyer', 'death_beam'): 'strong',
+    ('destroyer', 'emergency_shields'): 'strong',
+    ('destroyer', 'comms_tower'): 'strong',
+    ('destroyer', 'hacking_terminal'): 'strong',
     ('sniper', 'dreadnought'): 'strong',
+    ('sniper', 'trade_ship'): 'strong',
+    ('sniper', 'planetary_turret'): 'strong',
     ('dreadnought', 'destroyer'): 'strong',
+    ('dreadnought', 'trade_ship'): 'strong',
+    ('dreadnought', 'planetary_turret'): 'strong',
+    ('dreadnought', 'core_drill'): 'strong',
+    ('dreadnought', 'shipyard'): 'strong',
+    ('dreadnought', 'mining_depot'): 'strong',
+    ('dreadnought', 'trade_depot'): 'strong',
+    ('dreadnought', 'refinery'): 'strong',
+    ('dreadnought', 'fabricator'): 'strong',
+    ('dreadnought', 'tech_factory'): 'strong',
+    ('dreadnought', 'death_beam'): 'strong',
+    ('dreadnought', 'emergency_shields'): 'strong',
+    ('dreadnought', 'comms_tower'): 'strong',
+    ('dreadnought', 'hacking_terminal'): 'strong',
 })
 
 
