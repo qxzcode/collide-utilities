@@ -35,7 +35,7 @@ class CombatEntity(BaseModel):
     def take_damage(self, firepower: int, attacker: 'CombatEntity'):
         modifier = ATTACK_MODIFIERS[(attacker.kind, self.kind)]
         if modifier == 'strong':
-            crit_chance = min(attacker.crit_chance * 2, 100)
+            crit_chance = min(attacker.crit_chance + 40, 100)
         else:
             crit_chance = attacker.crit_chance
         print(f'Firepower: {firepower}, effective crit chance: {crit_chance}')
