@@ -90,19 +90,10 @@ def new_trade_ship(name: str) -> CombatEntity:
 # whether the attacker's attack is strong against the defender
 ATTACK_MODIFIERS = defaultdict(lambda: 'balanced', {
     ('scout', 'sniper'): 'strong',
-    ('sniper', 'scout'): 'weak',
-
     ('scout', 'dreadnought'): 'strong',
-    ('dreadnought', 'scout'): 'weak',
-
     ('scout', 'planetary_turret'): 'strong',
-    ('planetary_turret', 'scout'): 'weak',
-
     ('sniper', 'dreadnought'): 'strong',
-    ('dreadnought', 'sniper'): 'weak',
-
     ('dreadnought', 'destroyer'): 'strong',
-    ('destroyer', 'dreadnought'): 'weak',
 })
 
 
